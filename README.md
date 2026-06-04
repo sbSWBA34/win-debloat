@@ -1,28 +1,44 @@
 # win-debloat
 
-Debloat script for Acer Spin 3 and other Windows laptops. Removes bloatware, disables telemetry, and tweaks power settings.
+Windows debloat script inspired by [Raphire/Win11Debloat](https://github.com/Raphire/Win11Debloat).
+Removes OEM/Microsoft bloatware, disables telemetry, Bing, Start ads, and optimizes power settings.
 
 ## Usage
 
 **Right-click → Run with PowerShell (Admin)** or:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File debloat.ps1
+.\debloat.ps1 -RemoveApps -DisableTelemetry -DisableBing -DisableStartAds -HighPerformance
 ```
 
-## What it does
+### Parameters
 
-- Removes Acer, McAfee, Booking, Xbox, Office hubs, Skype, OneNote, Weather, News, Mail, Camera, Maps, Zune, and other crapware
-- Disables telemetry
-- Disables common startup junk (OneDrive, Acer, McAfee, Booking)
-- Sets power plan to High Performance
+| Parameter | What it does |
+|-----------|-------------|
+| `-RemoveApps` | Removes bloatware (Acer, McAfee, Booking, Xbox, Skype, OneNote, Camera, Zune, etc.) via Appx & WinGet |
+| `-DisableTelemetry` | Disables telemetry, advertising ID, activity history |
+| `-DisableBing` | Disables Bing web search and Cortana |
+| `-DisableStartAds` | Disables recommendations and ads in Start menu |
+| `-HighPerformance` | Sets power plan to High Performance |
+| `-RestorePoint` | Creates a system restore point before making changes |
+| `-Silent` | Non-interactive mode (no prompts) |
 
-## Restore
-
-If you need a removed app back, run from an admin prompt:
+### Quick (all-in-one with restore point)
 
 ```powershell
-Get-AppxPackage -AllUsers Microsoft.WindowsCamera | Add-AppxPackage -AllUsers
+.\debloat.ps1 -Silent -RestorePoint -RemoveApps -DisableTelemetry -DisableBing -DisableStartAds -HighPerformance
 ```
 
-Replace `Microsoft.WindowsCamera` with the package name you want back.
+## How it works
+
+- Uses `.reg` files (like Win11Debloat) for registry tweaks — easy to inspect and modify
+- Removes Appx packages for all users + provisions them so they don't come back
+- Uses WinGet for OEM software (Acer, McAfee, etc.)
+- Runs fully non-interactive with `-Silent`
+
+## Adding your own tweaks
+
+Drop `.reg` files into the `regfiles/` subdirectories:
+- `regfiles\telemetry\` — runs with `-DisableTelemetry`
+- `regfiles\bing\` — runs with `-DisableBing`
+- `regfiles\start\` — runs with `-DisableStartAds`

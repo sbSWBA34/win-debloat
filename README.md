@@ -12,10 +12,9 @@ powershell -ExecutionPolicy Bypass -File debloat.ps1
 
 ## What it does
 
-- Runs DISM + SFC to clean system files
 - Removes Acer, McAfee, Booking, Xbox, Office hubs, Skype, OneNote, Weather, News, Mail, Camera, Maps, Zune, and other crapware
 - Disables telemetry
-- Disables common startup junk
+- Disables common startup junk (OneDrive, Acer, McAfee, Booking)
 - Sets power plan to High Performance
 
 ## Restore

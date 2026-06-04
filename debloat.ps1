@@ -3,13 +3,8 @@
 Write-Host "=== Windows Debloat Script ===" -ForegroundColor Cyan
 Write-Host "Target: Acer Spin 3 + generic Windows crapware`n" -ForegroundColor Cyan
 
-# --- DISM + SFC (clean system files first) ---
-Write-Host "[1/5] Cleaning system image..." -ForegroundColor Yellow
-DISM /Online /Cleanup-Image /RestoreHealth | Out-Null
-sfc /scannow | Out-Null
-
 # --- Remove Windows Store bloat ---
-Write-Host "[2/5] Removing bloatware apps..." -ForegroundColor Yellow
+Write-Host "[1/4] Removing bloatware apps..." -ForegroundColor Yellow
 $bloat = @(
     "Microsoft.BingNews", "Microsoft.BingWeather", "Microsoft.GamingApp",
     "Microsoft.GetHelp", "Microsoft.Getstarted", "Microsoft.Messaging",
@@ -33,24 +28,21 @@ foreach ($pkg in (Get-AppxPackage -AllUsers $bloat)) {
 Write-Host "  Removed $count package(s)"
 
 # --- Disable telemetry & background services ---
-Write-Host "[3/5] Disabling telemetry & background services..." -ForegroundColor Yellow
+Write-Host "[2/4] Disabling telemetry & background services..." -ForegroundColor Yellow
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 0 -Force -ErrorAction SilentlyContinue
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 0 -Force -ErrorAction SilentlyContinue
 
 # --- Disable startup junk ---
-Write-Host "[4/5] Disabling startup programs..." -ForegroundColor Yellow
-$startupApps = @(
-    "OneDriveSetup", "MicrosoftEdgeAutoLaunch", "*Acer*", "*McAfee*"
-)
+Write-Host "[3/4] Disabling startup programs..." -ForegroundColor Yellow
 Get-CimInstance -ClassName Win32_StartupCommand | Where-Object {
-    $_.Name -match ($startupApps -join "|")
+    $_.Name -match "OneDrive|Acer|McAfee|Booking"
 } | ForEach-Object {
+    Disable-CimInstance $_ -ErrorAction SilentlyContinue
     Write-Host "  Disabled: $($_.Name)"
-    # requires registry edit to disable; this is informational
 }
 
 # --- Power plan ---
-Write-Host "[5/5] Setting power plan to High Performance..." -ForegroundColor Yellow
+Write-Host "[4/4] Setting power plan to High Performance..." -ForegroundColor Yellow
 powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
 
 Write-Host "`n=== Done! Restart your laptop. ===" -ForegroundColor Green
